@@ -2,4 +2,4 @@
 
 ## Messages about Camp026.
 
-Manually copied from SMS and RCS `>` Pasted into and HTML document styles to look like WhatsApp.
+Text is manually copied from SMS and RCS `>` Pasted into an HTML document styled to look like WhatsApp.
