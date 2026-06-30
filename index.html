@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>What saps</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Helvetica, Arial, sans-serif;
+                background-color: #dadbd3;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+
+            /* Main Chat Container mimicking WhatsApp Web layout */
+            .chat-container {
+                width: 100%;
+                max-width: 900px;
+                height: 90vh;
+                background-color: #efeae2; /* Signature WhatsApp background tint */
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+                border-radius: 3px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            /* Top Header Bar */
+            .chat-header {
+                background-color: #f0f2f5;
+                padding: 10px 16px;
+                display: flex;
+                align-items: center;
+                border-bottom: 1px solid #e9edef;
+                z-index: 100;
+            }
+
+            .avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: #6c757d;
+                margin-right: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+            }
+
+            .user-info h3 {
+                font-size: 16px;
+                color: #111b21;
+                font-weight: 500;
+            }
+
+            .user-info p {
+                font-size: 13px;
+                color: #667781;
+            }
+
+            /* Chat Messages Window */
+            .chat-messages {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px 5%;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                position: relative;
+                top: -35px;
+            }
+
+            /* Common message properties */
+            /* Container to sit avatar and bubble side-by-side */
+            .message-row {
+                display: flex;
+                align-items: flex-end;
+                gap: 8px;
+                align-self: flex-start;
+                max-width: 65%;
+            }
+
+            /* Small message-specific initial circle */
+            .msg-avatar {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background-color: #00a884; /* WhatsApp Green */
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-bottom: 2px;
+            }
+
+            /* Update max-width since the row wrapper handles constraint now */
+            .message {
+                padding: 6px 7px 8px 9px;
+                font-size: 14.2px;
+                color: #111b21;
+                border-radius: 7.5px;
+                position: relative;
+                line-height: 19px;
+                word-wrap: break-word;
+            }
+
+            .message.received {
+                background-color: #ffffff;
+                border-top-left-radius: 0px;
+            }
+
+            .message.sent {
+                max-width: 65%;
+                background-color: #d9fdd3;
+                align-self: flex-end;
+                border-top-right-radius: 0px;
+            }
+
+            /* Metatdata cluster inside bubbles */
+            .message-meta {
+                float: right;
+                margin: 4px 0 -5px 8px;
+                font-size: 11px;
+                color: #667781;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+            }
+
+            /* Received Messages (Left Side) */
+            .message.received {
+                background-color: #ffffff;
+                align-self: flex-start;
+                border-top-left-radius: 0px;
+            }
+
+            /* Sent Messages (Right Side) */
+            .message.sent {
+                background-color: #d9fdd3; /* WhatsApp pale green */
+                align-self: flex-end;
+                border-top-right-radius: 0px;
+            }
+
+            /* Double checkmarks color icon */
+            .status-ticks {
+                color: #53bdeb; /* Read blue ticks */
+                font-weight: bold;
+            }
+
+            /* Bottom Input Bar Replica */
+            .chat-footer {
+                background-color: #f0f2f5;
+                padding: 10px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .dummy-input {
+                flex: 1;
+                background-color: #ffffff;
+                padding: 9px 12px;
+                border-radius: 8px;
+                font-size: 15px;
+                color: #8696a0;
+                border: none;
+            }
+            /* Container to sit avatar and bubble side-by-side */
+            .message-row {
+                display: flex;
+                align-items: flex-end;
+                gap: 8px;
+                align-self: flex-start;
+                max-width: 65%;
+            }
+
+            /* Small message-specific initial circle */
+            .msg-avatar {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background-color: #00a884; /* WhatsApp Green */
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-bottom: 2px;
+            }
+
+            /* Update max-width since the row wrapper handles constraint now */
+            .message {
+                padding: 6px 7px 8px 9px;
+                font-size: 14.2px;
+                color: #111b21;
+                border-radius: 7.5px;
+                position: relative;
+                line-height: 19px;
+                word-wrap: break-word;
+            }
+
+            .message.received {
+                background-color: #ffffff;
+                border-top-left-radius: 0px;
+            }
+
+            .message.sent {
+                max-width: 65%;
+                background-color: #d9fdd3;
+                align-self: flex-end;
+                border-top-right-radius: 0px;
+            }
+
+            .terms-link {
+                color: #008069;
+                font-size: 13px;
+                text-decoration: underline;
+                cursor: pointer;
+                white-space: nowrap;
+                border: 0;
+            }
+
+            .modal-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(17, 27, 33, 0.55);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 18px;
+                z-index: 999;
+            }
+
+            .modal-overlay.is-open {
+                display: flex;
+            }
+
+            .modal-card {
+                width: min(680px, 100%);
+                max-height: 82vh;
+                overflow-y: auto;
+                background: #ffffff;
+                border-radius: 12px;
+                padding: 22px;
+                box-shadow: 0 14px 45px rgba(0, 0, 0, 0.28);
+                color: #111b21;
+                line-height: 1.45;
+            }
+
+            .modal-card h2 {
+                font-size: 22px;
+                margin-bottom: 12px;
+            }
+
+            .modal-card h3 {
+                font-size: 17px;
+                margin: 18px 0 8px;
+            }
+
+            .modal-card p,
+            .modal-card li {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            .modal-card ul {
+                padding-left: 22px;
+            }
+
+            .modal-close {
+                float: right;
+                border: 0;
+                background: #f0f2f5;
+                color: #111b21;
+                border-radius: 999px;
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+                cursor: pointer;
+            }
+
+            .modal-card a {
+                color: #008069;
+            }
+            .poo {
+                opacity: 50%;
+                color: lightpink;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="chat-container">
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="avatar">os</div>
+                <div class="user-info">
+                    <h3>What saps - Camp 26</h3>
+                    <p>offline</p>
+                </div>
+            </div>
+
+            <div class="chat-messages">
+                <div class="message received">
+                    Yeah, complete saps letting their lives get mined for ad
+                    revenue.
+                    <div class="message-meta">17:28</div>
+                </div>
+
+                <div class="message sent">
+                    If you are around - this year's camp will be Friday 3 -
+                    Sunday 5 July. Let me know if you're likely to join.
+                    <div class="message-meta">
+                        18:45 pm <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #007bff">
+                        🏭
+                    </div>
+                    <div class="message received">
+                        We will be in Brussels. Have a wonderful bash.
+                        <div class="message-meta">19:46</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #007bff">
+                        M
+                    </div>
+                    <div class="message received">
+                        Yes plz
+                        <div class="message-meta">20:05</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #007bff">
+                        A
+                    </div>
+                    <div class="message received">
+                        Thanks for the invite. Thinking about going to Madrid in
+                        July so probably won’t be able to make it 😢
+                        <div class="message-meta">10:42 am</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #e83e8c">
+                        L
+                    </div>
+                    <div class="message received">
+                        What should we bring ? Is there a feast theme ?
+                        <div class="message-meta">07:32</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    Taco? 🌮🌮🌮🌮🌮🌮🌮
+                    <div class="message-meta">
+                        18:45 pm <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #25d366">
+                        T
+                    </div>
+                    <div class="message received">
+                        Nice! Yep we are definitely around this year. Look
+                        forwards to it! 👍
+                        <div class="message-meta">09:18</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #007bff">
+                        A
+                    </div>
+                    <div class="message received">
+                        We might come just hangout for the Saturday as have to
+                        go up country on the Sunday
+                        <div class="message-meta">09:43</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #e83e8c">
+                        D
+                    </div>
+                    <div class="message received">
+                        You flip flopping know we will be there with bells on!!
+                        Xx
+                        <div class="message-meta">10:07</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #e83e8c">
+                        D
+                    </div>
+                    <div class="message received">
+                        High light of the whole year
+                        <div class="message-meta">10:08</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #fd7e14">
+                        S
+                    </div>
+                    <div class="message received">
+                        Yessy! We are all looking forward to it muchly xx
+                        <div class="message-meta">10:51</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #fd7e14">
+                        S
+                    </div>
+                    <div class="message received">
+                        🥒 Can&#x27;t find a jelly emoji... dont worry I
+                        won&#x27;t do cucumber jellies this year.
+                        <div class="message-meta">10:53</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    🥘
+                    <div class="message-meta">
+                        11:02 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #007bff">
+                        A
+                    </div>
+                    <div class="message received">
+                        Where are you going to pitch up?
+                        <div class="message-meta">11:06</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    My dad&#x27;s field.
+                    <div class="message-meta">
+                        11:09 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #007bff">
+                        A
+                    </div>
+                    <div class="message received">
+                        Sounds lovely. Not sure if we&#x27;d camp. might join
+                        for an afternoon swim if that were ok?
+                        <div class="message-meta">11:14</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    Of course. That would be great. Kids welcome throughout.
+                    Stay or just visit. You can decide on the day.
+                    <div class="message-meta">
+                        11:17 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #6f42c1">
+                        N
+                    </div>
+                    <div class="message received">
+                        Sounds fabulous! Will come on over xxx💫💛🎊
+                        <div class="message-meta">11:23</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #20c997">
+                        R
+                    </div>
+                    <div class="message received">
+                        Likely very much to join xxx - Need Lift
+                        <div class="message-meta">12:04</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    🍟 I&#x27;ll see who can bring you
+                    <div class="message-meta">
+                        12:26 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #ffc107">
+                        O
+                    </div>
+                    <div class="message received">
+                        Been dreaming for plenty years now.. 🙏 seeds are sown
+                        <div class="message-meta">12:29</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    Will dig out a Thrown, if you likely. Tis your day more x 👑
+                    <div class="message-meta">
+                        15:11 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #ffc107">
+                        O
+                    </div>
+                    <div class="message received">
+                        Brimming with temptation 😇
+                        <div class="message-meta">15:13</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #6610f2">
+                        P
+                    </div>
+                    <div class="message received">
+                        Oliver
+                        <div class="message-meta">13:11</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #007bff">
+                        A
+                    </div>
+                    <div class="message received">
+                        Right on. I think it&#x27;s a slim chance. What with
+                        work and all. I&#x27;ll let ye know if owt changes x
+                        <div class="message-meta">14:03</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #17a2b8">
+                        M
+                    </div>
+                    <div class="message received">
+                        I think I will join but probably not camp.
+                        <div class="message-meta">15:38</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    Bring your Swimming kit 🩱 🩳 👙 🏊‍♀️
+                    <div class="message-meta">
+                        13:19 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #dc3545">
+                        B
+                    </div>
+                    <div class="message received">
+                        Hello. Ah I will be at my brothers wedding in Italy .
+                        <div class="message-meta">16:22</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #6f42c1">
+                        N
+                    </div>
+                    <div class="message received">
+                        Hey, sadly I think I&#x27;m in Bristol that weekend..did
+                        you hand in your resignation yet? X
+                        <div class="message-meta">17:05</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    Not got an official start date yet : (
+                    <div class="message-meta">
+                        11:09 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: #17a2b8">
+                        M
+                    </div>
+                    <div class="message received">
+                        Yes am around!
+                        <div class="message-meta">18:47</div>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: deeppink">
+                        ~
+                    </div>
+                    <div class="message received">
+                        What is the plan?
+                        <div class="message-meta">21:23</div>
+                    </div>
+                </div>
+                <div class="message sent">
+                    🖼️ My favourite part is getting a full day clear with anyone
+                    else who feels the same about that full day feeling!
+                    (💂🕵️🧑‍🚀👩‍🎤👨‍🎨👩‍🔬🧑‍🍳🧑‍🌾🥷🧌)
+                    <br /><br />
+                    Therefore — I'll head to the field lunchtime on Friday to
+                    set up camp🚶‍♂️‍➡️. Leaving the clearing up to Later on Sunday
+                    🧎‍♂️.
+                    <br /><br />
+                    This keeps the Saturday clear for pure radical bliss! (🧘‍♂️ 🤸‍♂️
+                    🧗 🛀 🕴)️
+                    <br /><br />
+                    Join me : )<br />However, you can come and go whenever.
+                    Camping is best! Join in meals around the fire or cook for
+                    yourself in a sneaky corner 🏕️🌲 🍽️🔥🍲 🌲🤫. <br /><br />
+                    Bring your family, tent or van, swimming kit , things to
+                    drink, additional food items and please close any gates you
+                    open. <br /><br />(🧌 🧚, ⛺ 🚐, 🩱 🩳 👙 🏊‍♀️ 🩲 🧜‍♂️, 🧃 🍺 🍻
+                    🍷 🍸 🍹 🥃 🍾 🥂 🧪, 🍏 🥖 🍫, 🔒 🚪 🔓!)
+                    <div class="message-meta">
+                        22:54 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div class="message-row">
+                    <div class="msg-avatar" style="background-color: lightpink">
+                        ~
+                    </div>
+                    <div class="message received">
+                        Next weekend is next weekend now!
+                        <div class="message-meta">21:23</div>
+                    </div>
+                </div>
+
+                <div class="message sent">
+                    Itinirary is as follows - its all based on being in a field
+                    with a fire - eating and drinking. All other fun allowed,
+                    but not scheduled...<br />
+                </div>
+                <div class="message sent">
+                    Friday ⛺🔨<br />
+                    <b>Arrive</b> - There will be a fire, a sink, a loo, a
+                    shower, a pool, space for camping and a couple of benches
+                    and tables. (I will prep some dough for baking on
+                    Saturday)<br />
+                    <b>Dinner</b> - Paella Sencillo losoweger (🇪🇸 'Frying pan'
+                    'simple' 〓〓 'Vegitarian') - I will make a large rice dish,
+                    with cherry tomato, peppers and spices. I will bring things
+                    to add - you can too.
+                </div>
+                <div class="message sent">
+                    Saturday 🧘‍♂️🤸‍♂️🏋️🛀🕴️🧗🍳🤩🌈❤️‍🔥<br />
+                    <b>Breakfast</b> - Bring bits for a big sharing
+                    <i>Beyond-English Breakfast</i> - I will try and bake some
+                    bread on the fire. Bring something... sausages, Tomatoes,
+                    Veggy bacon, weird sloppy tofu and Shrooms etc. (dont bring
+                    it all)<br />
+                    <b>Lunch</b> - DIY cook on fire - barbeque style maybe?
+                    whatever.<br />
+                    <b>Dinner</b> - Tacos, Burritos and other KernMex delights.
+                    I'll bring many types of flatbread and build an enourmous
+                    bean delight. Bring toppings, sauces, relishes, Salsa and
+                    your Mezcal Trumpets. Make it in the field if you can. (If
+                    require meat or fish to survive and have a good time - you
+                    will have to bring some yourself.)
+                </div>
+
+                <div class="message sent">
+                    Sunday 🧎‍♂️<br />
+                    <b>Breakfast</b> - Shak-huevos ranch-souka style Eggs in
+                    lastnights magic.<br />
+                    <b>Lunch</b> - freestyle Use everything up time<br />
+                    <b>Hometime</b> - take some rubbish if you can. Take some
+                    recycling if you can. Don't forget your children. 🧹🗑️<br />
+                    <div class="message-meta">
+                        19:31 <span class="status-ticks">✓✓</span>
+                    </div>
+                </div>
+                <div id="chat-bottom"></div>
+            </div>
+
+            <!-- Footer Bar -->
+            <div class="chat-footer">
+                <div class="dummy-input">
+                    <span class="poo">Meta account detected</span><br />
+                    Messaging disabled
+                </div>
+                <button class="terms-link" id="terms-open" type="button">
+                    T&amp;Cs
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="terms-modal" aria-hidden="true">
+            <div
+                class="modal-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="terms-title"
+            >
+                <button
+                    class="modal-close"
+                    id="terms-close"
+                    type="button"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+                <h2 id="terms-title">Always read your T&amp;Cs</h2>
+                <p>
+                    The scariest part of how WhatsApp handles your data is not
+                    usually what you say. It is
+                    <strong>who you are, who you talk to, and when</strong>.
+                </p>
+                <p>
+                    Even when messages are encrypted, WhatsApp harvests your
+                    <strong>metadata</strong>. This creates a massive,
+                    interconnected map of human behavior. [<a
+                        href="https://heydata.eu/en/magazine/whatsapp-privacy-2025/"
+                        >1</a
+                    >,
+                    <a
+                        href="https://www.grayhats.com/en/blog/why-signal-is-infinitely-more-private-than-whatsapp"
+                        >2</a
+                    >].
+                </p>
+                <h3 id="-why-nothing-to-hide-misses-the-point-">
+                    <strong>Why “nothing to hide” misses the point</strong>
+                </h3>
+                <p>
+                    The content of texts have little value in this game. In
+                    reality, algorithms do not care about your words. They care
+                    about your <strong>patterns</strong>: when you are awake,
+                    who you are close to, what groups you belong to, and when
+                    your habits change. [<a
+                        href="https://www.instagram.com/reel/DZyvbihkSbU/"
+                        >1</a
+                    >]
+                </p>
+                <h3 id="-metadata-is-the-footprint-">
+                    <strong>Metadata is the footprint</strong>
+                </h3>
+                <ul>
+                    <li>
+                        <strong>The who:</strong> every person in your phone
+                        contacts and who you message.
+                    </li>
+                    <li>
+                        <strong>The when:</strong> The exact second you open the
+                        app and when you talk.
+                    </li>
+                    <li>
+                        <strong>The where:</strong> Your IP address and location
+                        data.
+                    </li>
+                    <li>
+                        <strong>The how often:</strong> who matters most in your
+                        network. Who you text most frequently. [<a
+                            href="https://ai-law.co.uk/how-private-are-your-whatsapp-chats/"
+                            >1</a
+                        >,
+                        <a href="https://www.instagram.com/reel/DLDQv37C6Jx/"
+                            >2</a
+                        >]
+                    </li>
+                </ul>
+                <h3 id="how-large-scale-farming-works">
+                    How Large-Scale Farming Works
+                </h3>
+                <h3
+                    id="when-whatsapp-combines-your-metadata-with-billions-of-other-users-it-stops-being-about-you-it-becomes-about-predictive-crowd-control-"
+                >
+                    When WhatsApp combines your metadata with billions of other
+                    users, it stops being about you. It becomes about
+                    <strong>predictive crowd control</strong>.
+                </h3>
+                <ul>
+                    <li>
+                        <strong>Guilt by association:</strong> your network can
+                        say things about you, even if you never typed them.
+                    </li>
+                    <li>
+                        <strong>Predicting Behavior</strong>: Companies can
+                        predict when you are lonely, awake, or vulnerable to
+                        buying things based on your chat timing.
+                    </li>
+                    <li>
+                        <strong>Mapping Networks</strong>: WhatsApp knows who
+                        the &quot;influencers&quot; are in a friend group,
+                        allowing targeted manipulation of ideas.
+                    </li>
+                    <li>
+                        <strong>The Meta Ecosystem</strong>: This data matches
+                        with Facebook and Instagram, building a flawless
+                        psychological profile of your daily life. [<a
+                            href="https://www.theguardian.com/technology/2021/jan/24/is-it-time-to-leave-whatsapp-and-is-signal-the-answer"
+                            >1</a
+                        >]
+                    </li>
+                </ul>
+                <p>
+                    By knowing <strong>who is doing what with whom</strong>,
+                    tech companies can predict and influence societal movements,
+                    shopping habits, and political opinions without ever reading
+                    a single text.
+                </p>
+                <p>
+                    <a
+                        href="https://www.theguardian.com/technology/2021/jan/24/is-it-time-to-leave-whatsapp-and-is-signal-the-answer"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >A gentle further read</a
+                    >
+                </p>
+            </div>
+        </div>
+
+        <script>
+            window.addEventListener("load", () => {
+                const messages = document.querySelector(".chat-messages");
+                const bottom = document.querySelector("#chat-bottom");
+                if (messages && bottom) {
+                    bottom.scrollIntoView({ block: "end" });
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            });
+
+            const modal = document.querySelector("#terms-modal");
+            const openTerms = document.querySelector("#terms-open");
+            const closeTerms = document.querySelector("#terms-close");
+
+            function showTerms() {
+                modal.classList.add("is-open");
+                modal.setAttribute("aria-hidden", "false");
+            }
+
+            function hideTerms() {
+                modal.classList.remove("is-open");
+                modal.setAttribute("aria-hidden", "true");
+            }
+
+            openTerms.addEventListener("click", showTerms);
+            closeTerms.addEventListener("click", hideTerms);
+            modal.addEventListener("click", (event) => {
+                if (event.target === modal) hideTerms();
+            });
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") hideTerms();
+            });
+        </script>
+    </body>
+</html>
